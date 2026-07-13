@@ -14,11 +14,35 @@ con métricas, y los expone mediante una app web interactiva.
 
 ## Arquitectura
 
-Serverless en AWS: React (Amplify) → API Gateway (HTTP API) → 4 Lambdas Python →
-DynamoDB (cache de Nager.Date). El backend ya está aprovisionado en AWS y el
-frontend se despliega automáticamente desde GitHub con Amplify en cada push a
-`main`. Ver [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) para el detalle de la
-infraestructura y su configuración.
+Serverless en AWS: los usuarios acceden a la app React alojada en **AWS Amplify**,
+que consume una **API Gateway (HTTP API)**; cada ruta invoca una **función Lambda**
+en Python que lee/escribe una tabla **DynamoDB** (`HolidaysDB`) usada como caché de
+la API pública Nager.Date.
+
+![Arquitectura AWS de HolidayImpact](docs/arquitectura.png)
+
+```
+Usuarios
+   │
+   ▼
+AWS Amplify  (React SPA, build automático desde GitHub)
+   │
+   ▼
+Amazon API Gateway  (HTTP API)
+   │
+   ├─► Lambda GetHolidays ──────┐
+   ├─► Lambda LongWeekends ─────┤
+   ├─► Lambda CompareCountries ─┤──► Amazon DynamoDB (HolidaysDB, caché TTL 30 días)
+   └─► Lambda DashboardStats ───┘              │
+                                               ▼
+                              Nager.Date API (date.nager.at, solo en cache miss)
+```
+
+Las 4 Lambdas comparten su lógica (cliente Nager.Date, caché en DynamoDB, algoritmo
+de fines de semana largos, métricas) mediante un **Lambda Layer** común. El backend
+ya está aprovisionado en AWS y el frontend se despliega automáticamente desde GitHub
+con Amplify en cada push a `main`. Ver [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
+para el detalle de la infraestructura y su configuración.
 
 ## Estructura del repo
 
