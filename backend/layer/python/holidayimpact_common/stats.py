@@ -19,7 +19,10 @@ def compute_dashboard_stats(holidays: list, year, today: date = None) -> dict:
         by_month[f"{d.month:02d}"] += 1
         by_weekday[WEEKDAY_NAMES[d.weekday()]] += 1
 
-    upcoming = sorted((d, h) for d, h in parsed if d >= today)
+    # Sort by date only. Sorting bare (date, dict) tuples would fall back to
+    # comparing the holiday dicts when two share a date (e.g. US/CA regional
+    # holidays on the same day), which raises TypeError.
+    upcoming = sorted(((d, h) for d, h in parsed if d >= today), key=lambda t: t[0])
     next_holiday = None
     if upcoming:
         d, h = upcoming[0]
