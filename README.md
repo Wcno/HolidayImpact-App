@@ -53,20 +53,6 @@ docs/       # Documentación de la infraestructura
 amplify.yml # Build spec de Amplify (monorepo, appRoot: frontend)
 ```
 
-## Desarrollo local
-
-Backend (tests):
-```bash
-cd backend && pip install -r requirements-dev.txt && pytest -v
-```
-
-Frontend:
-```bash
-cd frontend && npm install && npm run dev
-```
-Configura `frontend/.env` (ver `.env.example`) con la URL del API Gateway
-para probar contra datos reales.
-
 ## Despliegue
 
 - **Frontend**: automático desde GitHub vía AWS Amplify en cada push a `main`.
