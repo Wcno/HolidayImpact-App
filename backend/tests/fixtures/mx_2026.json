@@ -1,5 +1,0 @@
-[
-  {"date": "2026-01-01", "localName": "Año Nuevo", "name": "New Year's Day", "countryCode": "MX", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
-  {"date": "2026-09-16", "localName": "Día de la Independencia", "name": "Independence Day", "countryCode": "MX", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
-  {"date": "2026-12-25", "localName": "Navidad", "name": "Christmas Day", "countryCode": "MX", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]}
-]

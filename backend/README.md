@@ -10,18 +10,6 @@ a través de un Lambda Layer (`layer/python/holidayimpact_common`).
   cálculo de métricas.
 - `functions/{get_holidays,long_weekends,compare_countries,dashboard_stats}/handler.py`
   — handlers delgados, solo parsean la request y llaman al layer.
-- `tests/` — pytest con `moto` (DynamoDB simulado) y mocks de Nager.Date, sin
-  necesidad de credenciales AWS ni red.
-
-## Correr los tests localmente
-
-```bash
-cd backend
-python -m venv .venv
-./.venv/Scripts/activate   # o source .venv/bin/activate en Linux/Mac
-pip install -r requirements-dev.txt
-pytest -v
-```
 
 ## Notas de diseño
 
