@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getHolidays } from "../api/client";
+import { useApiData } from "../hooks/useApiData";
 import CountrySelect from "../components/CountrySelect";
 import YearSelect from "../components/YearSelect";
 import HolidayTable from "../components/HolidayTable";
@@ -9,18 +10,7 @@ import ErrorBanner from "../components/ErrorBanner";
 export default function HolidaysPage() {
   const [country, setCountry] = useState("PA");
   const [year, setYear] = useState(new Date().getFullYear());
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    getHolidays(country, year)
-      .then(setData)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [country, year]);
+  const { data, loading, error } = useApiData(() => getHolidays(country, year), [country, year]);
 
   return (
     <section>

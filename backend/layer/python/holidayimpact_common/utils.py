@@ -58,3 +58,19 @@ def parse_country_code(value: str):
     if len(value) != 2 or not value.isalpha():
         return None
     return value
+
+
+def parse_country_year(event):
+    """Parses and validates the country+year query params shared by 3 endpoints.
+
+    Returns (country, year, None) on success, or (None, None, error_response)
+    if a param is missing/invalid, so the caller can `return error` directly.
+    """
+    params = get_query_params(event)
+    country = parse_country_code(params.get("country"))
+    year = parse_year(params.get("year"))
+    if country is None:
+        return None, None, error_response(400, "Missing or invalid 'country' query param (2-letter ISO code)")
+    if year is None:
+        return None, None, error_response(400, "Missing or invalid 'year' query param")
+    return country, year, None

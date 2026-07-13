@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getDashboard } from "../api/client";
+import { useApiData } from "../hooks/useApiData";
 import CountrySelect from "../components/CountrySelect";
 import YearSelect from "../components/YearSelect";
+import BarChart from "../components/BarChart";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorBanner from "../components/ErrorBanner";
 
@@ -12,18 +14,7 @@ const MONTH_LABELS = [
 export default function DashboardPage() {
   const [country, setCountry] = useState("PA");
   const [year, setYear] = useState(new Date().getFullYear());
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    getDashboard(country, year)
-      .then(setData)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [country, year]);
+  const { data, loading, error } = useApiData(() => getDashboard(country, year), [country, year]);
 
   return (
     <section>
@@ -61,28 +52,20 @@ export default function DashboardPage() {
 
             <div className="chart-block">
               <h3>Distribución por mes</h3>
-              <div className="bar-chart">
-                {Object.entries(data.byMonth).map(([month, count]) => (
-                  <div className="bar" key={month} title={`${MONTH_LABELS[Number(month) - 1]}: ${count} feriados`}>
-                    <div className="bar-fill" style={{ height: `${count * 20 + 4}px` }} />
-                    <span className="bar-label">{MONTH_LABELS[Number(month) - 1]}</span>
-                    <span className="bar-value">{count}</span>
-                  </div>
-                ))}
-              </div>
+              <BarChart
+                data={data.byMonth}
+                formatLabel={(month) => MONTH_LABELS[Number(month) - 1]}
+                formatTooltip={(month, count) => `${MONTH_LABELS[Number(month) - 1]}: ${count} feriados`}
+              />
             </div>
 
             <div className="chart-block">
               <h3>Distribución por día de semana</h3>
-              <div className="bar-chart">
-                {Object.entries(data.byWeekday).map(([weekday, count]) => (
-                  <div className="bar" key={weekday} title={`${weekday}: ${count} feriados`}>
-                    <div className="bar-fill" style={{ height: `${count * 20 + 4}px` }} />
-                    <span className="bar-label">{weekday.slice(0, 3)}</span>
-                    <span className="bar-value">{count}</span>
-                  </div>
-                ))}
-              </div>
+              <BarChart
+                data={data.byWeekday}
+                formatLabel={(weekday) => weekday.slice(0, 3)}
+                formatTooltip={(weekday, count) => `${weekday}: ${count} feriados`}
+              />
             </div>
           </div>
         )
