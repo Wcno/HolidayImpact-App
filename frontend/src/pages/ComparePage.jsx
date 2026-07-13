@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { compareCountries } from "../api/client";
-import { COUNTRIES } from "../constants/countries";
+import { COUNTRIES, countryName } from "../constants/countries";
+import { useLang } from "../i18n/LanguageContext";
+import { formatHolidayDate } from "../i18n/format";
+import { translateHoliday } from "../i18n/holidayNames";
 import YearSelect from "../components/YearSelect";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorBanner from "../components/ErrorBanner";
@@ -8,6 +11,7 @@ import ErrorBanner from "../components/ErrorBanner";
 const DEFAULT_SELECTION = ["PA", "CO", "MX"];
 
 export default function ComparePage() {
+  const { lang, t } = useLang();
   const [selected, setSelected] = useState(DEFAULT_SELECTION);
   const [year, setYear] = useState(new Date().getFullYear());
   const [data, setData] = useState(null);
@@ -35,8 +39,8 @@ export default function ComparePage() {
 
   return (
     <section>
-      <h1>Comparar feriados entre países</h1>
-      <p className="muted">Selecciona entre 2 y 5 países.</p>
+      <h1>{t("compare_title")}</h1>
+      <p className="muted">{t("compare_hint")}</p>
       <div className="country-checklist">
         {COUNTRIES.map((c) => (
           <label key={c.code} className="checkbox-field">
@@ -45,14 +49,14 @@ export default function ComparePage() {
               checked={selected.includes(c.code)}
               onChange={() => toggleCountry(c.code)}
             />
-            {c.name}
+            {countryName(c, lang)}
           </label>
         ))}
       </div>
       <div className="controls">
         <YearSelect value={year} onChange={setYear} />
         <button onClick={handleCompare} disabled={selected.length < 2 || selected.length > 5}>
-          Comparar
+          {t("compare_button")}
         </button>
       </div>
       <ErrorBanner message={error} />
@@ -61,27 +65,27 @@ export default function ComparePage() {
       ) : (
         data && (
           <>
-            <h2>Resumen</h2>
+            <h2>{t("compare_summary")}</h2>
             <ul>
               {Object.entries(data.summary).map(([code, count]) => (
-                <li key={code}>{code}: {count} feriados</li>
+                <li key={code}>{t("compare_country_count", { code, n: count })}</li>
               ))}
             </ul>
-            <h2>Feriados en común ({data.commonHolidays.length})</h2>
+            <h2>{t("compare_common", { n: data.commonHolidays.length })}</h2>
             <table className="holiday-table">
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Nombres por país</th>
+                  <th>{t("table_date")}</th>
+                  <th>{t("compare_th_names")}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.commonHolidays.map((h) => (
                   <tr key={h.date}>
-                    <td>{h.date}</td>
+                    <td>{formatHolidayDate(h.date, lang)}</td>
                     <td>
                       {Object.entries(h.namesByCountry)
-                        .map(([code, name]) => `${code}: ${name}`)
+                        .map(([code, name]) => `${code}: ${translateHoliday(name, lang)}`)
                         .join(" · ")}
                     </td>
                   </tr>

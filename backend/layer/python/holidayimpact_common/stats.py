@@ -28,7 +28,7 @@ def compute_dashboard_stats(holidays: list, year, today: date = None) -> dict:
         d, h = upcoming[0]
         next_holiday = {
             "date": d.isoformat(),
-            "name": h["localName"],
+            "name": h["name"],
             "daysRemaining": (d - today).days,
         }
 
@@ -50,7 +50,7 @@ def compute_comparison(country_holidays_map: dict) -> dict:
     for country_code, holidays in country_holidays_map.items():
         results[country_code] = {"count": len(holidays), "holidays": holidays}
         for h in holidays:
-            by_date.setdefault(h["date"], {})[country_code] = h["localName"]
+            by_date.setdefault(h["date"], {})[country_code] = h["name"]
 
     common_holidays = [
         {"date": d, "namesByCountry": names}

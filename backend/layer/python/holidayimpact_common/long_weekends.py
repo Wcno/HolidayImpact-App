@@ -56,7 +56,7 @@ def detect_long_weekends(holidays: list, year) -> list:
                 "bridgeDate": None,
                 "holidayDates": [d.isoformat() for d in block_holiday_dates],
                 "holidayNames": [
-                    h["localName"] for d in block_holiday_dates for h in holiday_by_date[d]
+                    h["name"] for d in block_holiday_dates for h in holiday_by_date[d]
                 ],
             })
         elif block_length == 1:
@@ -82,7 +82,7 @@ def detect_long_weekends(holidays: list, year) -> list:
                     "type": "bridge",
                     "bridgeDate": bridge_date.isoformat(),
                     "holidayDates": [h_date.isoformat()],
-                    "holidayNames": [h["localName"] for h in holiday_by_date[h_date]],
+                    "holidayNames": [h["name"] for h in holiday_by_date[h_date]],
                 })
 
     results.sort(key=lambda r: r["startDate"])

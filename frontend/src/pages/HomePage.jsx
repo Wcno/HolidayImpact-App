@@ -1,47 +1,27 @@
 import { Link } from "react-router-dom";
+import { useLang } from "../i18n/LanguageContext";
 
 const FEATURES = [
-  {
-    to: "/feriados",
-    icon: "📅",
-    title: "Feriados por país",
-    description: "Consulta los días festivos oficiales de más de 100 países para cualquier año.",
-  },
-  {
-    to: "/fines-largos",
-    icon: "🏖️",
-    title: "Fines de semana largos",
-    description: "Detecta automáticamente los puentes y planifica tus escapadas del año.",
-  },
-  {
-    to: "/comparar",
-    icon: "🌎",
-    title: "Comparar países",
-    description: "Compara los feriados de hasta 5 países y descubre cuáles tienen en común.",
-  },
-  {
-    to: "/dashboard",
-    icon: "📊",
-    title: "Dashboard",
-    description: "Métricas por país: distribución mensual y semanal, próximo feriado y más.",
-  },
+  { to: "/feriados", icon: "📅", title: "feat_holidays_title", desc: "feat_holidays_desc" },
+  { to: "/fines-largos", icon: "🏖️", title: "feat_longweekends_title", desc: "feat_longweekends_desc" },
+  { to: "/comparar", icon: "🌎", title: "feat_compare_title", desc: "feat_compare_desc" },
+  { to: "/dashboard", icon: "📊", title: "feat_dashboard_title", desc: "feat_dashboard_desc" },
 ];
 
 export default function HomePage() {
+  const { t } = useLang();
   return (
     <div className="home">
       <section className="hero">
-        <span className="hero-badge">Datos abiertos de feriados</span>
+        <span className="hero-badge">{t("home_badge")}</span>
         <h1 className="hero-title">
-          Planifica tu año alrededor de los <span className="hero-accent">feriados</span>
+          {t("home_title_a")}
+          <span className="hero-accent">{t("home_title_accent")}</span>
         </h1>
-        <p className="hero-subtitle">
-          HolidayImpact reúne los días festivos de todo el mundo y los enriquece con
-          métricas útiles: puentes, comparaciones entre países y estadísticas por año.
-        </p>
+        <p className="hero-subtitle">{t("home_subtitle")}</p>
         <div className="hero-actions">
-          <Link className="btn-primary" to="/feriados">Explorar feriados</Link>
-          <Link className="btn-secondary" to="/dashboard">Ver dashboard</Link>
+          <Link className="btn-primary" to="/feriados">{t("home_cta_primary")}</Link>
+          <Link className="btn-secondary" to="/dashboard">{t("home_cta_secondary")}</Link>
         </div>
       </section>
 
@@ -49,9 +29,9 @@ export default function HomePage() {
         {FEATURES.map((f) => (
           <Link key={f.to} to={f.to} className="feature-card">
             <span className="feature-icon" aria-hidden="true">{f.icon}</span>
-            <h3 className="feature-title">{f.title}</h3>
-            <p className="feature-desc">{f.description}</p>
-            <span className="feature-link">Abrir →</span>
+            <h3 className="feature-title">{t(f.title)}</h3>
+            <p className="feature-desc">{t(f.desc)}</p>
+            <span className="feature-link">{t("home_open")} →</span>
           </Link>
         ))}
       </section>

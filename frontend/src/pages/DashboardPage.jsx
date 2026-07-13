@@ -1,35 +1,24 @@
 import { useState } from "react";
 import { getDashboard } from "../api/client";
 import { useApiData } from "../hooks/useApiData";
+import { useLang } from "../i18n/LanguageContext";
+import { monthShort, weekdayShort, weekdayFull } from "../i18n/format";
+import { translateHoliday } from "../i18n/holidayNames";
 import CountrySelect from "../components/CountrySelect";
 import YearSelect from "../components/YearSelect";
 import BarChart from "../components/BarChart";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorBanner from "../components/ErrorBanner";
 
-const MONTH_LABELS = [
-  "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
-];
-
-// The API returns weekday keys in English; map them to Spanish for display.
-const WEEKDAY_ES = {
-  Monday: "Lunes",
-  Tuesday: "Martes",
-  Wednesday: "Miércoles",
-  Thursday: "Jueves",
-  Friday: "Viernes",
-  Saturday: "Sábado",
-  Sunday: "Domingo",
-};
-
 export default function DashboardPage() {
+  const { lang, t } = useLang();
   const [country, setCountry] = useState("PA");
   const [year, setYear] = useState(new Date().getFullYear());
   const { data, loading, error } = useApiData(() => getDashboard(country, year), [country, year]);
 
   return (
     <section>
-      <h1>Dashboard de feriados</h1>
+      <h1>{t("dash_title")}</h1>
       <div className="controls">
         <CountrySelect value={country} onChange={setCountry} />
         <YearSelect value={year} onChange={setYear} />
@@ -42,40 +31,47 @@ export default function DashboardPage() {
           <div className="dashboard-grid">
             <div className="stat-tile">
               <span className="stat-value">{data.totalHolidays}</span>
-              <span className="stat-label">Total de feriados</span>
+              <span className="stat-label">{t("dash_total")}</span>
             </div>
             <div className="stat-tile">
               <span className="stat-value">{data.longWeekendCount}</span>
-              <span className="stat-label">Fines de semana largos</span>
+              <span className="stat-label">{t("dash_longweekends")}</span>
             </div>
             <div className="stat-tile">
               {data.nextHoliday ? (
                 <>
                   <span className="stat-value">{data.nextHoliday.daysRemaining}</span>
                   <span className="stat-label">
-                    días para {data.nextHoliday.name} ({data.nextHoliday.date})
+                    {t("dash_next", {
+                      name: translateHoliday(data.nextHoliday.name, lang),
+                      date: data.nextHoliday.date,
+                    })}
                   </span>
                 </>
               ) : (
-                <span className="stat-label">Sin próximos feriados este año</span>
+                <span className="stat-label">{t("dash_no_next")}</span>
               )}
             </div>
 
             <div className="chart-block">
-              <h3>Distribución por mes</h3>
+              <h3>{t("dash_by_month")}</h3>
               <BarChart
                 data={data.byMonth}
-                formatLabel={(month) => MONTH_LABELS[Number(month) - 1]}
-                formatTooltip={(month, count) => `${MONTH_LABELS[Number(month) - 1]}: ${count} feriados`}
+                formatLabel={(month) => monthShort(month, lang)}
+                formatTooltip={(month, count) =>
+                  t("dash_tooltip", { label: monthShort(month, lang), n: count })
+                }
               />
             </div>
 
             <div className="chart-block">
-              <h3>Distribución por día de semana</h3>
+              <h3>{t("dash_by_weekday")}</h3>
               <BarChart
                 data={data.byWeekday}
-                formatLabel={(weekday) => (WEEKDAY_ES[weekday] || weekday).slice(0, 3)}
-                formatTooltip={(weekday, count) => `${WEEKDAY_ES[weekday] || weekday}: ${count} feriados`}
+                formatLabel={(weekday) => weekdayShort(weekday, lang)}
+                formatTooltip={(weekday, count) =>
+                  t("dash_tooltip", { label: weekdayFull(weekday, lang), n: count })
+                }
               />
             </div>
           </div>

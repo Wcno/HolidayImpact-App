@@ -1,3 +1,6 @@
+import { useLang } from "../i18n/LanguageContext";
+
 export default function LoadingSpinner() {
-  return <p className="muted">Cargando…</p>;
+  const { t } = useLang();
+  return <p className="muted">{t("loading")}</p>;
 }
