@@ -15,22 +15,23 @@ con métricas, y los expone mediante una app web interactiva.
 ## Arquitectura
 
 Serverless en AWS: React (Amplify) → API Gateway (HTTP API) → 4 Lambdas Python →
-DynamoDB (cache de Nager.Date). Ver [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
-para el detalle completo y cómo desplegar con `./scripts/deploy.sh` (AWS CLI,
-sin CloudFormation/SAM/CDK).
+DynamoDB (cache de Nager.Date). El backend ya está aprovisionado en AWS y el
+frontend se despliega automáticamente desde GitHub con Amplify en cada push a
+`main`. Ver [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) para el detalle de la
+infraestructura y su configuración.
 
 ## Estructura del repo
 
 ```
 backend/    # 4 Lambdas Python + layer compartido + tests (pytest/moto)
-frontend/   # React (Vite) — 4 páginas: Feriados, Fines largos, Comparar, Dashboard
-docs/       # Guía de despliegue
-scripts/    # deploy.sh — despliegue vía AWS CLI
+frontend/   # React (Vite) — Home + 4 páginas: Feriados, Fines largos, Comparar, Dashboard
+docs/       # Documentación de la infraestructura
+amplify.yml # Build spec de Amplify (monorepo, appRoot: frontend)
 ```
 
 ## Desarrollo local
 
-Backend:
+Backend (tests):
 ```bash
 cd backend && pip install -r requirements-dev.txt && pytest -v
 ```
@@ -40,10 +41,10 @@ Frontend:
 cd frontend && npm install && npm run dev
 ```
 Configura `frontend/.env` (ver `.env.example`) con la URL del API Gateway
-desplegado para probar contra datos reales.
+para probar contra datos reales.
 
 ## Despliegue
 
-```bash
-./scripts/deploy.sh
-```
+- **Frontend**: automático desde GitHub vía AWS Amplify en cada push a `main`.
+- **Backend**: ya aprovisionado en AWS (DynamoDB, layer, 4 Lambdas, API Gateway).
+  Ver [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) para los detalles.

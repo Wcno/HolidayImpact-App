@@ -1,9 +1,9 @@
 # Despliegue en AWS
 
-El proyecto tiene dos mitades que se despliegan por caminos distintos:
+El proyecto tiene dos mitades:
 
-- **Backend** (DynamoDB + Lambdas + API Gateway): se aprovisiona con AWS CLI vía
-  [`scripts/deploy.sh`](../scripts/deploy.sh). Sin CloudFormation/SAM/CDK.
+- **Backend** (DynamoDB + Lambdas + API Gateway): ya está **aprovisionado en AWS**.
+  Este documento describe los recursos y su configuración como referencia.
 - **Frontend** (React): se despliega **automáticamente desde GitHub** con AWS
   Amplify en cada push a `main`. Nadie lo compila en local.
 
@@ -34,29 +34,28 @@ de fines de semana largos, métricas) mediante un **Lambda Layer**
 
 ---
 
-## Backend — `scripts/deploy.sh`
+## Backend (ya aprovisionado en AWS)
 
-### Requisitos
-- AWS CLI v2 configurado (`aws sts get-caller-identity` debe funcionar)
-- PowerShell (el script lo usa para empaquetar los .zip en Windows)
-
-### Uso
-```bash
-./scripts/deploy.sh
-```
-
-Es idempotente: si la tabla, el rol o la API ya existen, no los recrea; para las
-Lambdas y el layer, actualiza el código. Pasos que ejecuta:
+Región `us-east-1`. Recursos y su configuración:
 
 1. **DynamoDB** `HolidaysDB` (PK `countryCode`, SK `year`, on-demand) + TTL sobre `ttl`.
-2. **Lambda Layer** `holidayimpact-common` (código compartido de `backend/layer`).
+2. **Lambda Layer** `holidayimpact-common` (código compartido de `backend/layer`:
+   cliente Nager.Date, caché en DynamoDB, algoritmo de fines de semana largos, métricas).
 3. **Rol IAM** `holidayimpact-lambda-role` con logs + acceso `GetItem`/`PutItem`/
    `BatchGetItem`/`Query` acotado a la tabla. Las Lambdas **no** van en una VPC
    (necesitan salida a internet para llamar a `date.nager.at`).
 4. **4 funciones Lambda** (Python 3.13, handler `handler.lambda_handler`, layer
-   adjunto, env `HOLIDAYS_TABLE_NAME=HolidaysDB`, timeout 10s, memoria 256MB).
-5. **API Gateway (HTTP API)** con rutas `GET /holidays`, `/long-weekends`,
-   `/compare`, `/dashboard`, integración proxy a cada Lambda, CORS y stage `$default`.
+   adjunto, env `HOLIDAYS_TABLE_NAME=HolidaysDB`, timeout 10s, memoria 256MB):
+   `holidayimpact-get-holidays`, `holidayimpact-long-weekends`,
+   `holidayimpact-compare-countries`, `holidayimpact-dashboard-stats`.
+5. **API Gateway (HTTP API)** `holidayimpact-api` con rutas `GET /holidays`,
+   `/long-weekends`, `/compare`, `/dashboard`, integración proxy a cada Lambda,
+   CORS y stage `$default`.
+
+Para cambiar el código de una Lambda: empaqueta el `handler.py` correspondiente
+(y el layer si tocaste `backend/layer`) y súbelo con
+`aws lambda update-function-code` / `aws lambda publish-layer-version`. Los tests
+locales (`cd backend && pytest`) validan la lógica sin necesidad de AWS.
 
 ### Verificación
 ```bash
