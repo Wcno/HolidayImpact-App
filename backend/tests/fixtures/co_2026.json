@@ -1,0 +1,7 @@
+[
+  {"date": "2026-01-01", "localName": "Año Nuevo", "name": "New Year's Day", "countryCode": "CO", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
+  {"date": "2026-01-12", "localName": "Día de los Reyes Magos", "name": "Epiphany", "countryCode": "CO", "fixed": false, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
+  {"date": "2026-03-23", "localName": "Día de San José", "name": "Saint Joseph's Day", "countryCode": "CO", "fixed": false, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
+  {"date": "2026-07-20", "localName": "Día de la Independencia", "name": "Independence Day", "countryCode": "CO", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
+  {"date": "2026-12-25", "localName": "Navidad", "name": "Christmas Day", "countryCode": "CO", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]}
+]

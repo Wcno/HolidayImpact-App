@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+*.zip
+*.log
+.aws-deploy-state.json

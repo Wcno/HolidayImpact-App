@@ -1,0 +1,6 @@
+[
+  {"date": "2026-01-01", "localName": "New Year's Day", "name": "New Year's Day", "countryCode": "US", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
+  {"date": "2026-07-04", "localName": "Independence Day", "name": "Independence Day", "countryCode": "US", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
+  {"date": "2026-11-26", "localName": "Thanksgiving Day", "name": "Thanksgiving Day", "countryCode": "US", "fixed": false, "global": true, "counties": null, "launchYear": null, "types": ["Public"]},
+  {"date": "2026-12-25", "localName": "Christmas Day", "name": "Christmas Day", "countryCode": "US", "fixed": true, "global": true, "counties": null, "launchYear": null, "types": ["Public"]}
+]
