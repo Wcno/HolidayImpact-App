@@ -25,7 +25,7 @@ export default function HolidaysPage() {
       ) : (
         data && (
           <>
-            <p>{data.count} feriados encontrados ({data.source === "cache" ? "desde caché" : "desde Nager.Date"})</p>
+            <p>{data.count} feriados encontrados</p>
             <HolidayTable holidays={data.holidays} />
           </>
         )

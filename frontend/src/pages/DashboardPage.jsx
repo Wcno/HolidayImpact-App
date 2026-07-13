@@ -11,6 +11,17 @@ const MONTH_LABELS = [
   "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
 ];
 
+// The API returns weekday keys in English; map them to Spanish for display.
+const WEEKDAY_ES = {
+  Monday: "Lunes",
+  Tuesday: "Martes",
+  Wednesday: "Miércoles",
+  Thursday: "Jueves",
+  Friday: "Viernes",
+  Saturday: "Sábado",
+  Sunday: "Domingo",
+};
+
 export default function DashboardPage() {
   const [country, setCountry] = useState("PA");
   const [year, setYear] = useState(new Date().getFullYear());
@@ -63,8 +74,8 @@ export default function DashboardPage() {
               <h3>Distribución por día de semana</h3>
               <BarChart
                 data={data.byWeekday}
-                formatLabel={(weekday) => weekday.slice(0, 3)}
-                formatTooltip={(weekday, count) => `${weekday}: ${count} feriados`}
+                formatLabel={(weekday) => (WEEKDAY_ES[weekday] || weekday).slice(0, 3)}
+                formatTooltip={(weekday, count) => `${WEEKDAY_ES[weekday] || weekday}: ${count} feriados`}
               />
             </div>
           </div>

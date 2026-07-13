@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
-# Deploys HolidayImpact App to AWS using the AWS CLI only (no CloudFormation/SAM/CDK).
-# Idempotent-ish: re-running updates Lambda code/config and re-deploys the frontend
-# without recreating resources that already exist (table, role, API, Amplify app).
+# Provisions the HolidayImpact BACKEND on AWS using the AWS CLI only
+# (no CloudFormation/SAM/CDK): DynamoDB table, shared Lambda layer, IAM role,
+# the 4 Lambda functions, and the API Gateway HTTP API.
+#
+# The FRONTEND is NOT handled here — it deploys automatically from GitHub via
+# AWS Amplify on every push to main (see docs/DEPLOYMENT.md).
+#
+# Idempotent: re-running updates the Lambda code + layer without recreating
+# resources that already exist (table, role, API).
 #
 # Usage: ./scripts/deploy.sh
 # Requires: aws-cli v2 configured with credentials, PowerShell (for zipping on Windows).
@@ -14,19 +20,15 @@ TABLE_NAME="HolidaysDB"
 LAYER_NAME="holidayimpact-common"
 ROLE_NAME="holidayimpact-lambda-role"
 API_NAME="holidayimpact-api"
-AMPLIFY_APP_NAME="HolidayImpact-App"
-AMPLIFY_BRANCH="main"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BACKEND_DIR="$REPO_ROOT/backend"
-FRONTEND_DIR="$REPO_ROOT/frontend"
 # PowerShell and aws-cli's fileb:///file:// need native Windows paths, not Git Bash's
 # /c/... form (the native aws.exe / powershell.exe don't get MSYS path translation
 # for paths embedded inside a larger string). cygpath -m gives forward-slash Windows
 # paths (C:/Users/...), which both accept.
 BACKEND_DIR_WIN="$(cygpath -m "$BACKEND_DIR")"
-FRONTEND_DIR_WIN="$(cygpath -m "$FRONTEND_DIR")"
 SCRATCH_DIR="$(mktemp -d)"
 SCRATCH_DIR_WIN="$(cygpath -m "$SCRATCH_DIR")"
 
@@ -179,54 +181,19 @@ else
   echo "API $API_ID already exists, skipping route setup (functions already updated above)"
 fi
 API_ENDPOINT="https://$API_ID.execute-api.$REGION.amazonaws.com"
-echo "API endpoint: $API_ENDPOINT"
-
-echo "== 6. Build frontend against the API endpoint =="
-echo "VITE_API_BASE_URL=$API_ENDPOINT" > "$FRONTEND_DIR/.env.production"
-(cd "$FRONTEND_DIR" && npm install --silent && npm run build)
-
-echo "== 7. Amplify app (manual deploy, no GitHub token required) =="
-APP_ID=$(aws amplify list-apps --region "$REGION" \
-  --query "apps[?name=='$AMPLIFY_APP_NAME'].appId" --output text)
-if [ -z "$APP_ID" ]; then
-  APP_ID=$(aws amplify create-app --name "$AMPLIFY_APP_NAME" --region "$REGION" \
-    --query "app.appId" --output text)
-  aws amplify update-app --app-id "$APP_ID" \
-    --custom-rules '[{"source":"/<*>","target":"/index.html","status":"200"}]' \
-    --region "$REGION" >/dev/null
-  aws amplify create-branch --app-id "$APP_ID" --branch-name "$AMPLIFY_BRANCH" \
-    --region "$REGION" >/dev/null
-  echo "created Amplify app $APP_ID"
-fi
-
-powershell -NoProfile -Command "
-  \$ErrorActionPreference = 'Stop'
-  \$zipPath = '$FRONTEND_DIR_WIN/dist.zip'
-  if (Test-Path \$zipPath) { Remove-Item \$zipPath -Force }
-  Compress-Archive -Path '$FRONTEND_DIR_WIN/dist/*' -DestinationPath \$zipPath
-"
-
-DEPLOY_INFO=$(aws amplify create-deployment --app-id "$APP_ID" --branch-name "$AMPLIFY_BRANCH" --region "$REGION")
-JOB_ID=$(echo "$DEPLOY_INFO" | python -c "import json,sys; print(json.load(sys.stdin)['jobId'])")
-ZIP_UPLOAD_URL=$(echo "$DEPLOY_INFO" | python -c "import json,sys; print(json.load(sys.stdin)['zipUploadUrl'])")
-curl -s -X PUT -T "$FRONTEND_DIR_WIN/dist.zip" "$ZIP_UPLOAD_URL" >/dev/null
-aws amplify start-deployment --app-id "$APP_ID" --branch-name "$AMPLIFY_BRANCH" \
-  --job-id "$JOB_ID" --region "$REGION" >/dev/null
-
-echo "waiting for Amplify deployment..."
-for i in $(seq 1 24); do
-  status=$(aws amplify get-job --app-id "$APP_ID" --branch-name "$AMPLIFY_BRANCH" \
-    --job-id "$JOB_ID" --region "$REGION" --query 'job.summary.status' --output text)
-  echo "  status: $status"
-  if [ "$status" = "SUCCEED" ] || [ "$status" = "FAILED" ]; then
-    break
-  fi
-  sleep 5
-done
 
 echo ""
 echo "=========================================="
-echo " Deployment complete"
-echo " API:      $API_ENDPOINT"
-echo " Frontend: https://$AMPLIFY_BRANCH.$APP_ID.amplifyapp.com"
+echo " Backend provisioned"
+echo " API: $API_ENDPOINT"
+echo ""
+echo " Routes:"
+echo "   GET /holidays?country=PA&year=2026"
+echo "   GET /long-weekends?country=PA&year=2026"
+echo "   GET /compare?countries=PA,CO,MX&year=2026"
+echo "   GET /dashboard?country=PA&year=2026"
+echo ""
+echo " Frontend deploys separately from GitHub via AWS Amplify."
+echo " If the API URL ever changes, update frontend/.env.production"
+echo " (and the Amplify VITE_API_BASE_URL env var) and push."
 echo "=========================================="

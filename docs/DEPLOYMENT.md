@@ -1,108 +1,101 @@
 # Despliegue en AWS
 
-HolidayImpact App se despliega usando **AWS CLI directamente** (sin CloudFormation, SAM, CDK ni Serverless Framework). Toda la infraestructura se crea con comandos `aws` individuales, documentados y automatizados en [`scripts/deploy.sh`](../scripts/deploy.sh).
+El proyecto tiene dos mitades que se despliegan por caminos distintos:
 
-## Arquitectura desplegada
+- **Backend** (DynamoDB + Lambdas + API Gateway): se aprovisiona con AWS CLI vía
+  [`scripts/deploy.sh`](../scripts/deploy.sh). Sin CloudFormation/SAM/CDK.
+- **Frontend** (React): se despliega **automáticamente desde GitHub** con AWS
+  Amplify en cada push a `main`. Nadie lo compila en local.
+
+## Arquitectura
 
 ```
-Usuarios → AWS Amplify (React, hosting estático)
+Usuarios → AWS Amplify (React, build automático desde GitHub)
               │
               ▼
         Amazon API Gateway (HTTP API)
               │
    ┌──────────┼──────────┬──────────────┐
    ▼          ▼          ▼              ▼
-GetHolidays  LongWeekends CompareCountries DashboardStats   (AWS Lambda, Python 3.13)
+GetHolidays  LongWeekends CompareCountries DashboardStats   (Lambda, Python 3.13)
    │          │          │              │
    └──────────┴──────────┴──────────────┘
               │
               ▼
-      Amazon DynamoDB (HolidaysDB)
+      Amazon DynamoDB (HolidaysDB, caché con TTL de 30 días)
               │
               ▼
       Nager.Date API (date.nager.at) — solo en cache miss
 ```
 
-Las 4 Lambdas comparten lógica (cliente Nager.Date, acceso a DynamoDB, algoritmo de
-fines de semana largos, cálculo de métricas) a través de un **Lambda Layer**
-(`holidayimpact-common`), en vez de duplicar código.
+Las 4 Lambdas comparten lógica (cliente Nager.Date, caché en DynamoDB, algoritmo
+de fines de semana largos, métricas) mediante un **Lambda Layer**
+(`holidayimpact-common`).
 
-## Requisitos previos
+---
 
-- AWS CLI v2 instalado y configurado (`aws sts get-caller-identity` debe funcionar)
-- Node.js 18+ y npm (para compilar el frontend)
-- PowerShell (usado por el script para empaquetar los .zip en Windows)
+## Backend — `scripts/deploy.sh`
 
-## Despliegue automatizado
+### Requisitos
+- AWS CLI v2 configurado (`aws sts get-caller-identity` debe funcionar)
+- PowerShell (el script lo usa para empaquetar los .zip en Windows)
 
+### Uso
 ```bash
 ./scripts/deploy.sh
 ```
 
-El script es idempotente: si un recurso ya existe (tabla, rol, API), no lo vuelve a
-crear; para las Lambdas y el frontend, actualiza el código y vuelve a desplegar.
+Es idempotente: si la tabla, el rol o la API ya existen, no los recrea; para las
+Lambdas y el layer, actualiza el código. Pasos que ejecuta:
 
-## Qué hace el script, paso a paso
+1. **DynamoDB** `HolidaysDB` (PK `countryCode`, SK `year`, on-demand) + TTL sobre `ttl`.
+2. **Lambda Layer** `holidayimpact-common` (código compartido de `backend/layer`).
+3. **Rol IAM** `holidayimpact-lambda-role` con logs + acceso `GetItem`/`PutItem`/
+   `BatchGetItem`/`Query` acotado a la tabla. Las Lambdas **no** van en una VPC
+   (necesitan salida a internet para llamar a `date.nager.at`).
+4. **4 funciones Lambda** (Python 3.13, handler `handler.lambda_handler`, layer
+   adjunto, env `HOLIDAYS_TABLE_NAME=HolidaysDB`, timeout 10s, memoria 256MB).
+5. **API Gateway (HTTP API)** con rutas `GET /holidays`, `/long-weekends`,
+   `/compare`, `/dashboard`, integración proxy a cada Lambda, CORS y stage `$default`.
 
-1. **DynamoDB**: crea la tabla `HolidaysDB` (PK `countryCode` string, SK `year`
-   string, modo on-demand) y habilita TTL sobre el atributo `ttl` (cache de 30 días).
-2. **Lambda Layer**: empaqueta `backend/layer/python/holidayimpact_common` en un
-   zip y lo publica como capa (`holidayimpact-common`), compatible con
-   `python3.13`/`python3.12`.
-3. **Rol IAM**: crea `holidayimpact-lambda-role` con `AWSLambdaBasicExecutionRole`
-   (logs) más una política inline con `GetItem`/`PutItem`/`BatchGetItem`/`Query`
-   acotada al ARN de `HolidaysDB`. Importante: estas Lambdas **no** están en una
-   VPC — si se agregan a una VPC sin NAT Gateway, las llamadas salientes a
-   `date.nager.at` fallarán.
-4. **4 funciones Lambda**: `holidayimpact-get-holidays`,
-   `holidayimpact-long-weekends`, `holidayimpact-compare-countries`,
-   `holidayimpact-dashboard-stats`. Runtime Python 3.13, handler
-   `handler.lambda_handler`, capa adjunta, rol adjunto, variable de entorno
-   `HOLIDAYS_TABLE_NAME=HolidaysDB`, timeout 10s, memoria 256MB.
-5. **API Gateway (HTTP API)**: crea las rutas `GET /holidays`,
-   `GET /long-weekends`, `GET /compare`, `GET /dashboard`, cada una con
-   integración `AWS_PROXY` hacia su Lambda; CORS configurado a nivel de API
-   (`*` origins/métodos GET,OPTIONS); stage `$default` con auto-deploy.
-6. **Frontend**: escribe `frontend/.env.production` con la URL real del API
-   Gateway y corre `npm run build`.
-7. **Amplify**: crea la app (`HolidayImpact-App`), agrega la regla de reescritura
-   SPA (`/<*>` → `/index.html`, status 200, necesaria para que las rutas de
-   React Router como `/dashboard` no den 404 al refrescar), y despliega el
-   `dist/` compilado mediante **despliegue manual por zip**
-   (`create-deployment` → `PUT` del zip a la URL firmada → `start-deployment`) —
-   esto evita tener que conectar un token de GitHub.
-
-## Por qué despliegue manual de Amplify (sin conectar GitHub)
-
-Conectar Amplify a un repositorio de GitHub vía CLI requiere un token de acceso
-personal de GitHub (`--access-token`/`--oauth-token`). Para evitar manejar
-credenciales de GitHub en este flujo, se usa el modo de **despliegue manual**
-de Amplify: se sube un `.zip` del build directamente. Si más adelante se quiere
-CI/CD automático en cada push, se puede conectar el repo desde la consola de
-Amplify (Hosting → conectar rama) sin perder la configuración ya creada.
-
-## Verificación end-to-end
-
+### Verificación
 ```bash
-API_URL="<tu API endpoint>"
-curl "$API_URL/holidays?country=PA&year=2026"
-curl "$API_URL/long-weekends?country=CO&year=2026"
-curl "$API_URL/compare?countries=CO,US,MX&year=2026"
-curl "$API_URL/dashboard?country=PA&year=2026"
+API="https://<api-id>.execute-api.us-east-1.amazonaws.com"
+curl "$API/holidays?country=PA&year=2026"
+curl "$API/long-weekends?country=CO&year=2026"
+curl "$API/compare?countries=CO,US,MX&year=2026"
+curl "$API/dashboard?country=PA&year=2026"
 ```
 
-Luego abre la URL de Amplify (`https://main.<app-id>.amplifyapp.com`) y navega
-las 4 páginas.
+---
 
-## Redeploy tras cambios de código
+## Frontend — GitHub → AWS Amplify
 
-- Cambios en `backend/layer` o `backend/functions`: correr `./scripts/deploy.sh`
-  de nuevo — actualiza el código de las Lambdas y la capa.
-- Cambios en `frontend/`: correr `./scripts/deploy.sh` — recompila y vuelve a
-  subir el `dist/` a Amplify.
+El frontend se hostea en Amplify conectado al repo de GitHub. **Cada push a
+`main` dispara un build y despliegue automático.** No se usa deploy manual.
+
+Configuración que debe existir en la app de Amplify (ya aprovisionada):
+
+- **Repositorio conectado** a `github.com/Wcno/HolidayImpact-App`, rama `main`,
+  con auto-build activado.
+- **Build spec**: [`amplify.yml`](../amplify.yml) en la **raíz** del repo, en
+  formato monorepo (`appRoot: frontend`) — corre `npm ci && npm run build` dentro
+  de `frontend/` y publica `frontend/dist`.
+- **Variables de entorno** (en la app de Amplify):
+  - `AMPLIFY_MONOREPO_APP_ROOT=frontend` — para que Amplify detecte el monorepo.
+  - `VITE_API_BASE_URL=<URL del API Gateway>` — respaldo; también está commiteada
+    en `frontend/.env.production`, que es lo que Vite lee en el build de producción.
+- **Regla de reescritura SPA** (para que rutas como `/dashboard` no den 404):
+  ```
+  source: </^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>
+  target: /index.html
+  status: 200
+  ```
+
+Si el endpoint del API Gateway cambia, actualiza `frontend/.env.production` (y la
+variable `VITE_API_BASE_URL` en Amplify) y haz push — Amplify reconstruye solo.
 
 ## Costos
 
-Todos los servicios usados (DynamoDB on-demand, Lambda, API Gateway HTTP API,
-Amplify Hosting) tienen capa gratuita generosa en AWS; para el volumen de tráfico
-de un proyecto de curso, el costo esperado es $0.
+DynamoDB on-demand, Lambda, API Gateway HTTP API y Amplify Hosting tienen capa
+gratuita amplia; para el tráfico de un proyecto de curso, el costo esperado es $0.

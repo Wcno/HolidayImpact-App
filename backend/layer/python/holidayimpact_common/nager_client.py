@@ -33,8 +33,3 @@ def get_public_holidays(country_code: str, year: int):
     """Returns the raw Nager.Date list of holidays for a country/year, or [] if unknown."""
     url = f"{BASE_URL}/PublicHolidays/{year}/{country_code.upper()}"
     return _get_json(url)
-
-
-def get_available_countries():
-    url = f"{BASE_URL}/AvailableCountries"
-    return _get_json(url)
