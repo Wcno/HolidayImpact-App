@@ -16,7 +16,6 @@ export const STRINGS = {
     loading: "Cargando…",
 
     // home
-    home_badge: "Datos abiertos de feriados",
     home_title_a: "Planifica tu año alrededor de los ",
     home_title_accent: "feriados",
     home_subtitle:
@@ -84,7 +83,6 @@ export const STRINGS = {
     field_year: "Year",
     loading: "Loading…",
 
-    home_badge: "Open public holiday data",
     home_title_a: "Plan your year around ",
     home_title_accent: "public holidays",
     home_subtitle:

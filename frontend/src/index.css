@@ -428,17 +428,6 @@ button:focus-visible {
   padding: 3rem 0 2.5rem;
 }
 
-.hero-badge {
-  display: inline-block;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--accent-strong);
-  background: rgba(42, 120, 214, 0.12);
-  border-radius: 999px;
-  padding: 0.3rem 0.85rem;
-  margin-bottom: 1.25rem;
-}
-
 .hero-title {
   font-size: clamp(2rem, 5vw, 3rem);
   line-height: 1.1;

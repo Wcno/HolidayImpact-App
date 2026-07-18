@@ -13,7 +13,6 @@ export default function HomePage() {
   return (
     <div className="home">
       <section className="hero">
-        <span className="hero-badge">{t("home_badge")}</span>
         <h1 className="hero-title">
           {t("home_title_a")}
           <span className="hero-accent">{t("home_title_accent")}</span>
