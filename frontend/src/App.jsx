@@ -28,6 +28,27 @@ function LanguageToggle() {
   );
 }
 
+function Footer() {
+  const { t } = useLang();
+  return (
+    <footer className="app-footer">
+      <span>© {new Date().getFullYear()} HolidayImpact · {t("footer_tagline")}</span>
+      <nav className="footer-links">
+        <a href="https://date.nager.at" target="_blank" rel="noreferrer">
+          {t("footer_data")}
+        </a>
+        <a
+          href="https://github.com/Wcno/HolidayImpact-App"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub
+        </a>
+      </nav>
+    </footer>
+  );
+}
+
 export default function App() {
   const { t } = useLang();
   return (
@@ -52,6 +73,7 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }
