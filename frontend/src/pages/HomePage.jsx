@@ -6,7 +6,6 @@ const FEATURES = [
   { to: "/feriados", icon: "📅", title: "feat_holidays_title", desc: "feat_holidays_desc" },
   { to: "/fines-largos", icon: "🏖️", title: "feat_longweekends_title", desc: "feat_longweekends_desc" },
   { to: "/comparar", icon: "🌎", title: "feat_compare_title", desc: "feat_compare_desc" },
-  { to: "/dashboard", icon: "📊", title: "feat_dashboard_title", desc: "feat_dashboard_desc" },
 ];
 
 export default function HomePage() {

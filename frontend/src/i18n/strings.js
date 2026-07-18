@@ -29,8 +29,6 @@ export const STRINGS = {
     feat_longweekends_desc: "Detecta automáticamente los puentes y planifica tus escapadas del año.",
     feat_compare_title: "Comparar países",
     feat_compare_desc: "Compara los feriados de hasta 5 países y descubre cuáles tienen en común.",
-    feat_dashboard_title: "Dashboard",
-    feat_dashboard_desc: "Métricas por país: distribución mensual y semanal, próximo feriado y más.",
 
     // holidays page
     holidays_title: "Feriados por país y año",
@@ -96,8 +94,6 @@ export const STRINGS = {
     feat_longweekends_desc: "Automatically detect long weekends and plan your getaways for the year.",
     feat_compare_title: "Compare countries",
     feat_compare_desc: "Compare the holidays of up to 5 countries and find which ones they share.",
-    feat_dashboard_title: "Dashboard",
-    feat_dashboard_desc: "Per-country metrics: monthly and weekday distribution, next holiday and more.",
 
     holidays_title: "Holidays by country and year",
     holidays_count: "{n} holidays found",
