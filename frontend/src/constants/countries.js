@@ -1,29 +1,36 @@
-// Curated subset of Nager.Date's AvailableCountries (https://date.nager.at/api/v3/AvailableCountries).
-// Static on purpose: no dedicated Lambda exposes this list, so it's sourced once at dev time
-// rather than fetched live on every page load. Names are provided per language.
-export const COUNTRIES = [
-  { code: "PA", es: "Panamá", en: "Panama" },
-  { code: "CO", es: "Colombia", en: "Colombia" },
-  { code: "MX", es: "México", en: "Mexico" },
-  { code: "US", es: "Estados Unidos", en: "United States" },
-  { code: "CA", es: "Canadá", en: "Canada" },
-  { code: "BR", es: "Brasil", en: "Brazil" },
-  { code: "AR", es: "Argentina", en: "Argentina" },
-  { code: "CL", es: "Chile", en: "Chile" },
-  { code: "PE", es: "Perú", en: "Peru" },
-  { code: "EC", es: "Ecuador", en: "Ecuador" },
-  { code: "ES", es: "España", en: "Spain" },
-  { code: "FR", es: "Francia", en: "France" },
-  { code: "DE", es: "Alemania", en: "Germany" },
-  { code: "IT", es: "Italia", en: "Italy" },
-  { code: "GB", es: "Reino Unido", en: "United Kingdom" },
-  { code: "PT", es: "Portugal", en: "Portugal" },
-  { code: "CR", es: "Costa Rica", en: "Costa Rica" },
-  { code: "DO", es: "República Dominicana", en: "Dominican Republic" },
-  { code: "GT", es: "Guatemala", en: "Guatemala" },
-  { code: "UY", es: "Uruguay", en: "Uruguay" },
+// Every country supported by the Nager.Date API (https://date.nager.at/api/v3/AvailableCountries).
+// The code list is a dev-time snapshot — static on purpose: no dedicated Lambda exposes
+// the list, so it's sourced once rather than fetched live on every page load.
+// Names are localized at runtime with Intl.DisplayNames, so no manual translation table.
+export const COUNTRY_CODES = [
+  "AD", "AG", "AI", "AL", "AM", "AO", "AR", "AT", "AU", "AW", "AX", "BA",
+  "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BL", "BM", "BO", "BQ",
+  "BR", "BS", "BW", "BY", "BZ", "CA", "CD", "CF", "CG", "CH", "CI", "CL",
+  "CM", "CN", "CO", "CR", "CU", "CV", "CW", "CY", "CZ", "DE", "DJ", "DK",
+  "DM", "DO", "DZ", "EC", "EE", "EG", "ER", "ES", "FI", "FK", "FO", "FR",
+  "GA", "GB", "GD", "GE", "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP",
+  "GQ", "GR", "GT", "GW", "GY", "HK", "HN", "HR", "HT", "HU", "ID", "IE",
+  "IM", "IQ", "IS", "IT", "JE", "JM", "JP", "KE", "KH", "KI", "KM", "KN",
+  "KR", "KY", "KZ", "LC", "LI", "LR", "LS", "LT", "LU", "LV", "LY", "MA",
+  "MC", "MD", "ME", "MF", "MG", "MK", "ML", "MN", "MQ", "MR", "MS", "MT",
+  "MW", "MX", "MZ", "NA", "NC", "NE", "NG", "NI", "NL", "NO", "NR", "NU",
+  "NZ", "PA", "PE", "PG", "PH", "PL", "PM", "PN", "PR", "PT", "PW", "PY",
+  "RO", "RS", "RU", "RW", "SC", "SE", "SG", "SI", "SJ", "SK", "SL", "SM",
+  "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SZ", "TC", "TD", "TG", "TN",
+  "TO", "TR", "TT", "TV", "TZ", "UA", "UG", "US", "UY", "VA", "VC", "VE",
+  "VG", "VI", "VN", "WS", "ZA", "ZM", "ZW",
 ];
 
-export function countryName(country, lang) {
-  return country[lang] || country.es;
+const cache = {};
+
+// Returns [{ code, name }] with names in the given language, sorted alphabetically
+// for that language. Memoized per language.
+export function getCountries(lang) {
+  if (!cache[lang]) {
+    const names = new Intl.DisplayNames([lang], { type: "region" });
+    const collator = new Intl.Collator(lang);
+    cache[lang] = COUNTRY_CODES.map((code) => ({ code, name: names.of(code) || code }))
+      .sort((a, b) => collator.compare(a.name, b.name));
+  }
+  return cache[lang];
 }

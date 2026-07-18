@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { compareCountries } from "../api/client";
-import { COUNTRIES, countryName } from "../constants/countries";
+import { getCountries } from "../constants/countries";
 import { useLang } from "../i18n/LanguageContext";
 import { formatHolidayDate } from "../i18n/format";
 import { translateHoliday } from "../i18n/holidayNames";
@@ -42,14 +42,14 @@ export default function ComparePage() {
       <h1>{t("compare_title")}</h1>
       <p className="muted">{t("compare_hint")}</p>
       <div className="country-checklist">
-        {COUNTRIES.map((c) => (
+        {getCountries(lang).map((c) => (
           <label key={c.code} className="checkbox-field">
             <input
               type="checkbox"
               checked={selected.includes(c.code)}
               onChange={() => toggleCountry(c.code)}
             />
-            {countryName(c, lang)}
+            {c.name}
           </label>
         ))}
       </div>

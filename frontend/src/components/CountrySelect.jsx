@@ -1,4 +1,4 @@
-import { COUNTRIES, countryName } from "../constants/countries";
+import { getCountries } from "../constants/countries";
 import { useLang } from "../i18n/LanguageContext";
 
 export default function CountrySelect({ value, onChange, label }) {
@@ -7,9 +7,9 @@ export default function CountrySelect({ value, onChange, label }) {
     <label className="field">
       <span>{label || t("field_country")}</span>
       <select value={value} onChange={(e) => onChange(e.target.value)}>
-        {COUNTRIES.map((c) => (
+        {getCountries(lang).map((c) => (
           <option key={c.code} value={c.code}>
-            {countryName(c, lang)}
+            {c.name}
           </option>
         ))}
       </select>

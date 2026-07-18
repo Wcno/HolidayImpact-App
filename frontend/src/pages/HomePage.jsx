@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useLang } from "../i18n/LanguageContext";
-import { COUNTRIES } from "../constants/countries";
+import { COUNTRY_CODES } from "../constants/countries";
 
 const FEATURES = [
   { to: "/feriados", icon: "📅", title: "feat_holidays_title", desc: "feat_holidays_desc" },
@@ -29,7 +29,7 @@ export default function HomePage() {
           <Link key={f.to} to={f.to} className="feature-card">
             <span className="feature-icon" aria-hidden="true">{f.icon}</span>
             <h3 className="feature-title">{t(f.title)}</h3>
-            <p className="feature-desc">{t(f.desc, { n: COUNTRIES.length })}</p>
+            <p className="feature-desc">{t(f.desc, { n: COUNTRY_CODES.length })}</p>
             <span className="feature-link">{t("home_open")} →</span>
           </Link>
         ))}
