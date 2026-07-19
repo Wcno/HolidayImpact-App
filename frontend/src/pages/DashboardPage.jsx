@@ -37,18 +37,19 @@ export default function DashboardPage() {
               <span className="stat-value">{data.longWeekendCount}</span>
               <span className="stat-label">{t("dash_longweekends")}</span>
             </div>
-            <div className="stat-tile">
+            <div className="stat-tile next-holiday">
               {data.nextHoliday ? (
                 <>
                   <span className="stat-value">{data.nextHoliday.daysRemaining}</span>
-                  <span className="stat-label">
-                    {t("dash_next", {
-                      name: translateHoliday(data.nextHoliday.name, lang),
-                      date: formatHolidayDate(data.nextHoliday.date, lang),
-                    })}
+                  <span className="stat-label">{t("dash_next_days")}</span>
+                  <span className="next-holiday-name">
+                    🎉 {translateHoliday(data.nextHoliday.name, lang)}
+                  </span>
+                  <span className="next-holiday-date">
+                    {formatHolidayDate(data.nextHoliday.date, lang)}
                   </span>
                   {data.nextHoliday.observedDate && (
-                    <span className="stat-label">
+                    <span className="next-holiday-date">
                       {t("dash_observed", {
                         date: formatHolidayDate(data.nextHoliday.observedDate, lang),
                       })}
