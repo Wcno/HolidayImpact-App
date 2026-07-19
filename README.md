@@ -19,7 +19,8 @@ que consume una **API Gateway (HTTP API)**; cada ruta invoca una **función Lamb
 en Python que lee/escribe una tabla **DynamoDB** (`HolidaysDB`) usada como caché de
 la API pública Nager.Date.
 
-![Arquitectura AWS de HolidayImpact](docs/arquitectura.png)
+<img src="docs/arquitectura.png" alt="Arquitectura AWS de HolidayImpact" width="500">
+
 
 ```
 Usuarios
