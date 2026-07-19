@@ -5,7 +5,7 @@ from .long_weekends import detect_long_weekends
 from .utils import WEEKDAY_NAMES, parse_date
 
 
-def compute_dashboard_stats(holidays: list, year, today: date = None) -> dict:
+def compute_dashboard_stats(holidays: list, year, today: date = None, suggest_bridges: bool = True) -> dict:
     if today is None:
         today = datetime.now(timezone.utc).date()
 
@@ -14,6 +14,8 @@ def compute_dashboard_stats(holidays: list, year, today: date = None) -> dict:
 
     parsed = []
     for h in holidays:
+        # Charts count the actual holiday date on purpose, even when the day
+        # off is observed on another date (observedDate).
         d = parse_date(h["date"])
         parsed.append((d, h))
         by_month[f"{d.month:02d}"] += 1
@@ -31,8 +33,10 @@ def compute_dashboard_stats(holidays: list, year, today: date = None) -> dict:
             "name": h["name"],
             "daysRemaining": (d - today).days,
         }
+        if h.get("observedDate"):
+            next_holiday["observedDate"] = h["observedDate"]
 
-    long_weekends = detect_long_weekends(holidays, year)
+    long_weekends = detect_long_weekends(holidays, year, suggest_bridges)
 
     return {
         "totalHolidays": len(holidays),

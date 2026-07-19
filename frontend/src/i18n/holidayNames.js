@@ -54,6 +54,7 @@ const HOLIDAY_ES = {
   "National Holiday": "Fiesta Nacional",
 
   // Panamá
+  "National Mourning Day": "Día de Duelo Nacional",
   "Martyr's Day": "Día de los Mártires",
   "Martyrs' Day": "Día de los Mártires",
   "Separation Day": "Separación de Panamá de Colombia",

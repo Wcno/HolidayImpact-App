@@ -2,7 +2,7 @@ import { useState } from "react";
 import { getDashboard } from "../api/client";
 import { useApiData } from "../hooks/useApiData";
 import { useLang } from "../i18n/LanguageContext";
-import { monthShort, weekdayShort, weekdayFull } from "../i18n/format";
+import { monthShort, weekdayShort, weekdayFull, formatHolidayDate } from "../i18n/format";
 import { translateHoliday } from "../i18n/holidayNames";
 import CountrySelect from "../components/CountrySelect";
 import YearSelect from "../components/YearSelect";
@@ -44,9 +44,16 @@ export default function DashboardPage() {
                   <span className="stat-label">
                     {t("dash_next", {
                       name: translateHoliday(data.nextHoliday.name, lang),
-                      date: data.nextHoliday.date,
+                      date: formatHolidayDate(data.nextHoliday.date, lang),
                     })}
                   </span>
+                  {data.nextHoliday.observedDate && (
+                    <span className="stat-label">
+                      {t("dash_observed", {
+                        date: formatHolidayDate(data.nextHoliday.observedDate, lang),
+                      })}
+                    </span>
+                  )}
                 </>
               ) : (
                 <span className="stat-label">{t("dash_no_next")}</span>

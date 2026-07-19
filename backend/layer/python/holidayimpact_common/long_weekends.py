@@ -1,7 +1,9 @@
 """Detects long weekends ("puentes") from a year's holiday list.
 
 Algorithm (see docs/DEPLOYMENT.md / README for the full write-up):
-  1. Build the set of "days off" = weekends (Sat/Sun) union holiday dates.
+  1. Build the set of "days off" = weekends (Sat/Sun) union holiday dates
+     union observed dates (e.g. Panama's Sunday holidays observed on the
+     following Monday, exposed as `observedDate` by country_rules).
   2. For each holiday, expand outward while adjacent days are also off,
      forming a contiguous block. Blocks of >= 3 days are "natural" long
      weekends (covers Monday/Friday holidays and consecutive holidays).
@@ -9,6 +11,8 @@ Algorithm (see docs/DEPLOYMENT.md / README for the full write-up):
      turned into a 4-day weekend by taking a single "bridge" day off
      (the Monday before, or the Friday after, respectively). Wednesday
      holidays are not bridgeable under this single-day-bridge definition.
+     Disabled via suggest_bridges=False for countries where that vacation
+     custom does not apply (Panama).
 
 Known limitation: cross-year boundaries are not considered, since holidays
 are fetched and cached one year at a time.
@@ -18,16 +22,19 @@ from datetime import date, timedelta
 from .utils import parse_date
 
 
-def detect_long_weekends(holidays: list, year) -> list:
+def detect_long_weekends(holidays: list, year, suggest_bridges: bool = True) -> list:
     holiday_by_date = {}
     for h in holidays:
         d = parse_date(h["date"])
         holiday_by_date.setdefault(d, []).append(h)
 
     holiday_dates = set(holiday_by_date.keys())
+    observed_dates = {
+        parse_date(h["observedDate"]) for h in holidays if h.get("observedDate")
+    }
 
     def is_day_off(d: date) -> bool:
-        return d.weekday() in (5, 6) or d in holiday_dates
+        return d.weekday() in (5, 6) or d in holiday_dates or d in observed_dates
 
     emitted_blocks = set()
     results = []
@@ -59,7 +66,7 @@ def detect_long_weekends(holidays: list, year) -> list:
                     h["name"] for d in block_holiday_dates for h in holiday_by_date[d]
                 ],
             })
-        elif block_length == 1:
+        elif block_length == 1 and suggest_bridges:
             weekday = h_date.weekday()  # Mon=0 .. Sun=6
             bridge_date = None
             bridge_start, bridge_end = None, None
