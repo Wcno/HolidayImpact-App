@@ -14,6 +14,8 @@ export const STRINGS = {
     field_country: "País",
     field_year: "Año",
     loading: "Cargando…",
+    country_search_placeholder: "Escribe para buscar un país…",
+    country_search_empty: "Sin resultados",
 
     // home
     home_title_a: "Planifica tu año alrededor de los ",
@@ -81,6 +83,8 @@ export const STRINGS = {
     field_country: "Country",
     field_year: "Year",
     loading: "Loading…",
+    country_search_placeholder: "Type to search a country…",
+    country_search_empty: "No matches",
 
     home_title_a: "Plan your year around ",
     home_title_accent: "public holidays",

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { compareCountries } from "../api/client";
-import { getCountries } from "../constants/countries";
+import { searchCountries } from "../constants/countries";
 import { useLang } from "../i18n/LanguageContext";
 import { formatHolidayDate } from "../i18n/format";
 import { translateHoliday } from "../i18n/holidayNames";
@@ -13,6 +13,7 @@ const DEFAULT_SELECTION = ["PA", "CO", "MX"];
 export default function ComparePage() {
   const { lang, t } = useLang();
   const [selected, setSelected] = useState(DEFAULT_SELECTION);
+  const [filter, setFilter] = useState("");
   const [year, setYear] = useState(new Date().getFullYear());
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -41,8 +42,15 @@ export default function ComparePage() {
     <section>
       <h1>{t("compare_title")}</h1>
       <p className="muted">{t("compare_hint")}</p>
+      <input
+        type="text"
+        className="country-filter"
+        placeholder={t("country_search_placeholder")}
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
       <div className="country-checklist">
-        {getCountries(lang).map((c) => (
+        {searchCountries(lang, filter).map((c) => (
           <label key={c.code} className="checkbox-field">
             <input
               type="checkbox"

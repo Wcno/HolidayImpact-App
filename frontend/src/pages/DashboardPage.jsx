@@ -43,7 +43,7 @@ export default function DashboardPage() {
                   <span className="stat-value">{data.nextHoliday.daysRemaining}</span>
                   <span className="stat-label">{t("dash_next_days")}</span>
                   <span className="next-holiday-name">
-                    🎉 {translateHoliday(data.nextHoliday.name, lang)}
+                    {translateHoliday(data.nextHoliday.name, lang)}
                   </span>
                   <span className="next-holiday-date">
                     {formatHolidayDate(data.nextHoliday.date, lang)}

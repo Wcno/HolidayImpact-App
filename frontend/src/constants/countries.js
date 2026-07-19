@@ -34,3 +34,55 @@ export function getCountries(lang) {
   }
   return cache[lang];
 }
+
+// Accent- and case-insensitive form used for matching ("Panamá" -> "panama").
+function normalize(s) {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+// Edit distance with early exit; strings here are short so the DP is cheap.
+function levenshtein(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j++) {
+      row[j] = Math.min(
+        prev[j] + 1,
+        row[j - 1] + 1,
+        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+    prev = row;
+  }
+  return prev[b.length];
+}
+
+// Fuzzy search over the localized country list. Ranks exact prefixes first,
+// then word prefixes and substrings, and finally typo-tolerant matches
+// (Levenshtein distance <= 1 for short queries, <= 2 for longer ones), so
+// "colonbia" still finds "Colombia".
+export function searchCountries(lang, query) {
+  const list = getCountries(lang);
+  const q = normalize(query.trim());
+  if (!q) return list;
+
+  const maxDistance = q.length >= 6 ? 2 : q.length >= 4 ? 1 : 0;
+  const scored = [];
+  for (const c of list) {
+    const name = normalize(c.name);
+    const words = name.split(/[\s-]+/);
+    let score = 0;
+    if (name.startsWith(q)) score = 100;
+    else if (c.code.toLowerCase() === q) score = 90;
+    else if (words.some((w) => w.startsWith(q))) score = 80;
+    else if (name.includes(q)) score = 60;
+    else if (maxDistance > 0) {
+      const d = Math.min(
+        ...words.flatMap((w) => [levenshtein(q, w), levenshtein(q, w.slice(0, q.length))])
+      );
+      if (d <= maxDistance) score = 40 - d * 10;
+    }
+    if (score > 0) scored.push({ ...c, score });
+  }
+  return scored.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+}
