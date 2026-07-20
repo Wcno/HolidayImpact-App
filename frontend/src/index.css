@@ -413,14 +413,30 @@ input[type="text"]:focus-visible {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
   animation: fade-up 0.4s ease-out;
 }
 
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-tile-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--gridline);
+  box-shadow: 0 1px 2px rgba(11, 11, 11, 0.04);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-tile-group:hover {
+  box-shadow: 0 4px 12px rgba(11, 11, 11, 0.08);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--gridline));
 }
 
 .stat-tile {
@@ -433,6 +449,23 @@ input[type="text"]:focus-visible {
   gap: 0.25rem;
   box-shadow: 0 1px 2px rgba(11, 11, 11, 0.04);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-tile-half {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  justify-content: center;
+}
+
+.stat-tile-half:hover {
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.stat-tile-group .stat-tile-half + .stat-tile-half {
+  border-top: 1px solid var(--gridline);
 }
 
 .stat-tile:hover {
