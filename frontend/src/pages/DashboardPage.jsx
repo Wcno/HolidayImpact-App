@@ -29,15 +29,13 @@ export default function DashboardPage() {
       ) : (
         data && (
           <div className="dashboard-grid">
-            <div className="stat-tile-group">
-              <div className="stat-tile stat-tile-half">
-                <span className="stat-value">{data.totalHolidays}</span>
-                <span className="stat-label">{t("dash_total")}</span>
-              </div>
-              <div className="stat-tile stat-tile-half">
-                <span className="stat-value">{data.longWeekendCount}</span>
-                <span className="stat-label">{t("dash_longweekends")}</span>
-              </div>
+            <div className="stat-tile">
+              <span className="stat-value">{data.totalHolidays}</span>
+              <span className="stat-label">{t("dash_total")}</span>
+            </div>
+            <div className="stat-tile">
+              <span className="stat-value">{data.longWeekendCount}</span>
+              <span className="stat-label">{t("dash_longweekends")}</span>
             </div>
             <div className="stat-tile progress-tile">
               <span className="stat-value progress-stat-value">{data.holidaysPassed}/{data.totalHolidays}</span>
