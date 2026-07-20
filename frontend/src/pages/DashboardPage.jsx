@@ -61,6 +61,20 @@ export default function DashboardPage() {
               )}
             </div>
 
+            <div className="stat-tile progress-tile">
+              <span className="stat-label">{t("dash_progress")}</span>
+              <div className="progress-bar-bg">
+                <div
+                  className="progress-bar-fill"
+                  style={{ width: `${(data.holidaysPassed / data.totalHolidays) * 100}%` }}
+                />
+              </div>
+              <span className="stat-value progress-stat-value">{data.holidaysPassed}/{data.totalHolidays}</span>
+              <span className="stat-label">
+                {t("dash_passed", { n: data.holidaysPassed })} · {t("dash_remaining", { n: data.holidaysRemaining })}
+              </span>
+            </div>
+
             <div className="chart-block">
               <h3>{t("dash_by_month")}</h3>
               <BarChart

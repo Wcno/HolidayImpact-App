@@ -67,6 +67,9 @@ export const STRINGS = {
     dash_by_month: "Distribución por mes",
     dash_by_weekday: "Distribución por día de semana",
     dash_tooltip: "{label}: {n} feriados",
+    dash_progress: "Feriados del año",
+    dash_passed: "{n} pasados",
+    dash_remaining: "{n} restantes",
 
     // footer
     footer_tagline: "Proyecto académico — UTP",
@@ -131,6 +134,9 @@ export const STRINGS = {
     dash_by_month: "Distribution by month",
     dash_by_weekday: "Distribution by weekday",
     dash_tooltip: "{label}: {n} holidays",
+    dash_progress: "Year holidays",
+    dash_passed: "{n} passed",
+    dash_remaining: "{n} remaining",
 
     footer_tagline: "Academic project — UTP",
     footer_data: "Holiday data by Nager.Date",
