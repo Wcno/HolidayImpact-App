@@ -8,6 +8,9 @@ Only Panama (PA) has special rules today:
     Monday is exposed as an extra `observedDate` field.
   - Panama's only "puente" is that Sunday -> Monday shift, so the Tue/Thu
     bridge-day suggestions of the long-weekend detector are disabled for PA.
+  - Nager.Date lists both Carnival Monday and Carnival Tuesday as "Public"
+    for Panama, but only Carnival Tuesday is an actual paid non-working day
+    by law, so the Monday entry is dropped here.
 """
 from datetime import timedelta
 
@@ -26,6 +29,7 @@ def apply_country_rules(country_code: str, year, holidays: list) -> list:
     if country_code.upper() != "PA":
         return holidays
     result = _inject_mourning_day(int(year), list(holidays))
+    result = _drop_carnival_monday(result)
     result = [_with_sunday_shift(h) for h in result]
     result.sort(key=lambda h: h["date"])
     return result
@@ -51,6 +55,18 @@ def _inject_mourning_day(year: int, holidays: list) -> list:
         "types": ["Public"],
     })
     return holidays
+
+
+def _drop_carnival_monday(holidays: list) -> list:
+    """Nager.Date marks both Carnival days "Public" for Panama, but only
+    Carnival Tuesday is a legally-free non-working day."""
+    carnival = [h for h in holidays if h.get("name") == "Carnival"]
+    if len(carnival) < 2:
+        return holidays
+    mondays = {h["date"] for h in carnival if parse_date(h["date"]).weekday() == 0}
+    if not mondays:
+        return holidays
+    return [h for h in holidays if not (h.get("name") == "Carnival" and h["date"] in mondays)]
 
 
 def _with_sunday_shift(holiday: dict) -> dict:
