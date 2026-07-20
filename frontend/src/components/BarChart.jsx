@@ -8,11 +8,11 @@ export default function BarChart({ data, formatLabel = (k) => k, formatTooltip }
 
   return (
     <div className="bar-chart">
-      {entries.map(([key, count], i) => {
+      {entries.map(([key, count]) => {
         const label = formatLabel(key);
         return (
           <div className="bar" key={key} title={formatTooltip ? formatTooltip(key, count) : `${label}: ${count}`}>
-            <div className="bar-fill" style={{ height: `${(count / max) * MAX_BAR_PX}px`, animationDelay: `${i * 0.04}s` }} />
+            <div className="bar-fill" style={{ height: `${(count / max) * MAX_BAR_PX}px` }} />
             <span className="bar-label">{label}</span>
             <span className="bar-value">{count}</span>
           </div>

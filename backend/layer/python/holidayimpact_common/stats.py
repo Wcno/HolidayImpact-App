@@ -38,17 +38,12 @@ def compute_dashboard_stats(holidays: list, year, today: date = None, suggest_br
 
     long_weekends = detect_long_weekends(holidays, year, suggest_bridges)
 
-    holidays_passed = sum(1 for d, _ in parsed if d < today)
-    holidays_remaining = sum(1 for d, _ in parsed if d >= today)
-
     return {
         "totalHolidays": len(holidays),
         "byMonth": by_month,
         "byWeekday": by_weekday,
         "nextHoliday": next_holiday,
         "longWeekendCount": len(long_weekends),
-        "holidaysPassed": holidays_passed,
-        "holidaysRemaining": holidays_remaining,
     }
 
 
